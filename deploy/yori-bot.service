@@ -1,0 +1,43 @@
+# Yori Log Extractor — systemd unit for a VPS or a home server.
+#
+#   sudo cp deploy/yori-bot.service /etc/systemd/system/yori-bot.service
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now yori-bot
+#   journalctl -u yori-bot -f
+#
+# Adjust User/WorkingDirectory if you cloned the repo somewhere else.
+[Unit]
+Description=Yori Log Extractor (Telegram -> MantisBin bot)
+Documentation=https://github.com/harshi79/Yori-Log-Extractor
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=yori
+Group=yori
+WorkingDirectory=/opt/yori-log-extractor
+EnvironmentFile=/opt/yori-log-extractor/.env
+ExecStart=/opt/yori-log-extractor/.venv/bin/python run.py --quiet
+Restart=always
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGINT
+
+# Hardening: the bot only needs outbound HTTPS.
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+RestrictNamespaces=true
+LockPersonality=true
+CapabilityBoundingSet=
+AmbientCapabilities=
+
+[Install]
+WantedBy=multi-user.target

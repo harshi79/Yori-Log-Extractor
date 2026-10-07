@@ -1,0 +1,26 @@
+# Yori Log Extractor — run the bot with:
+#   cp .env.example .env      # fill in the token + API key
+#   docker compose up -d
+#   docker compose logs -f
+services:
+  yori-bot:
+    build: .
+    image: yori-log-extractor:latest
+    container_name: yori-bot
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      # Belt and braces: the values in .env win, these are only defaults.
+      MANTISBIN_EXPIRY: "never"
+    # The bot stores nothing locally; it only holds one outbound HTTP client.
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
